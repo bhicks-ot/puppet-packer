@@ -12,7 +12,7 @@ class packer(
   validate_re($kernel, ['^Linux$','^FreeBSD$','^OpenBSD$','^Windows$','^Darwin$'])
   validate_string($version)
 
-  $package_name = downcase("${version}_${kernel}_${architecture}.zip")
+  $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip")
   $full_url = "${base_url}/${package_name}"
 
   if !defined(Class['staging']) {
