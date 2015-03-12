@@ -23,19 +23,18 @@ class packer(
     }
   }
 
-  exec { 'check_version_change':
-    path       => "/bin",
-    command    => "rm -f ${install_dir}/packer",
-    unless     => "packer_version=$(/opt/packer/bin/packer --version | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi"
-  }
-
   $install_path = dirtree($install_dir)
   file { $install_path: ensure => directory, }
   
+  exec { 'check_version_change':
+    path       => "/bin",
+    command    => "rm ${install_dir}/packer*",
+    unless     => "packer_version=$(/opt/packer/bin/packer --version | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi"
+  } ->  
   staging::file { $package_name: source => $full_url, } ->
   staging::extract { $package_name:
     target => $install_dir,
     creates => "${install_dir}/packer",
-    require => File[$install_path]; Exec['check_version_change'],
+    require => File[$install_path],
   }
 }
