@@ -12,8 +12,6 @@ class packer(
   validate_re($kernel, ['^Linux$','^FreeBSD$','^OpenBSD$','^Windows$','^Darwin$'])
   validate_string($version)
 
-  $full_url = "${base_url}/${package_name}"
-
   case $version < '0.7.6' {
     true:  { $version_check = '/opt/packer/bin/packer --version ' }
     false: { $version_check = '/opt/packer/bin/packer version ' }
@@ -23,6 +21,8 @@ class packer(
     true:  { $package_name = downcase("${version}_${kernel}_${architecture}.zip") }
     false: { $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip") }
   }
+
+  $full_url = "${base_url}/${package_name}"
 
   if !defined(Class['staging']) {
     class { 'staging':
@@ -35,11 +35,6 @@ class packer(
   $install_path = dirtree($install_dir)
   file { $install_path: ensure => directory, }
   
-#  exec { 'check_version_change':
-#    path       => "/bin",
-#    command    => "rm ${install_dir}/packer*",
-#    unless     => "/bin/bash -c 'packer_version=\$($version_check | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi'"
-# }  
   staging::file { $package_name: source => $full_url, } ->
   staging::extract { $package_name:
     target => $install_dir,
