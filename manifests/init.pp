@@ -20,6 +20,11 @@ class packer(
     false: { $version_check = '/opt/packer/bin/packer version ' }
   }
 
+  case $version < '0.7.0' {
+    true:  { $package_name = downcase("${version}_${kernel}_${architecture}.zip") }
+    false: { $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip") }
+  }
+
   if !defined(Class['staging']) {
     class { 'staging':
       path => '/var/staging',
