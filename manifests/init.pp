@@ -12,7 +12,7 @@ class packer(
   validate_re($kernel, ['^Linux$','^FreeBSD$','^OpenBSD$','^Windows$','^Darwin$'])
   validate_string($version)
 
-  case $version < '0.7.6' {
+  case $version < '0.7.5' {
     true:  { $version_check = '/opt/packer/bin/packer --version' }
     false: { $version_check = '/opt/packer/bin/packer version' }
   }
@@ -35,10 +35,15 @@ class packer(
   $install_path = dirtree($install_dir)
   file { $install_path: ensure => directory, }
   
+  exec { 'check_version_change':
+    path    => "/bin",
+    command => "rm ${install_dir}/packer*",
+    unless  => "/bin/bash -c 'packer_version=\$($version_check | sed -nre \"s/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p\"); if [ \$packer_version = ${version} ]; then exit 0; else exit 1; fi'"
+  } ->  
   staging::file { $package_name: source => $full_url, } ->
   staging::extract { $package_name:
-    target => $install_dir,
-    unless => "/bin/bash -c 'packer_version=\$($version_check | sed -nre \"s/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p\"); if [ \$packer_version = ${version} ]; then exit 0; else exit 1; fi'",
+    target  => $install_dir,
+    creates => "${install_dir}/packer",
     require => File[$install_path],
   }
 }
