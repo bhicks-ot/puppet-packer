@@ -31,15 +31,15 @@ class packer(
   $install_path = dirtree($install_dir)
   file { $install_path: ensure => directory, }
   
-  exec { 'check_version_change':
-    path       => "/bin",
-    command    => "rm ${install_dir}/packer*",
-    unless     => "/bin/bash -c 'packer_version=\$($version_check | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi'"
-  } ->  
+#  exec { 'check_version_change':
+#    path       => "/bin",
+#    command    => "rm ${install_dir}/packer*",
+#    unless     => "/bin/bash -c 'packer_version=\$($version_check | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi'"
+# }  
   staging::file { $package_name: source => $full_url, } ->
   staging::extract { $package_name:
     target => $install_dir,
-    creates => "${install_dir}/packer",
+    unless => "/bin/bash -c 'packer_version=\$($version_check | sed -nre 's/^Packer v[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p'); if [ \$packer_version = ${version} ]; then echo 0; else echo 1; fi'",
     require => File[$install_path],
   }
 }
