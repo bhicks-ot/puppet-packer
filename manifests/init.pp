@@ -12,16 +12,33 @@ class packer(
   validate_re($kernel, ['^Linux$','^FreeBSD$','^OpenBSD$','^Windows$','^Darwin$'])
   validate_string($version)
 
-  case $version < '0.7.5' {
-    true:  { $version_check = '/opt/packer/bin/packer --version' }
-    false: { $version_check = '/opt/packer/bin/packer version' }
+  # packer version foreman is a numeric triple such as 0.6.1, 0.7.5, or 0.10.0
+  $split_version = split($version, '[.]')
+
+  # Explicitly set conditions based on the version number
+  if ($split_version[0] == 0)  and 
+     ($split_version[1] < 7) { # versions 0.0.0 through 0.6.x
+    # package name and version call is different from default
+    $package_name = downcase("${version}_${kernel}_${architecture}.zip")
+    $version_check = '/opt/packer/bin/packer --version'
+
+  } elsif ($split_version[0] == 0) and
+          ($split_version[1] == 7) and
+          ($split_version[2] <  5) { # versions 0.7.0 through 0.7.4
+    # package name is same as default but version call is different
+    $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip")
+    $version_check = '/opt/packer/bin/packer --version'
   }
 
-  case $version < '0.7.0' {
-    true:  { $package_name = downcase("${version}_${kernel}_${architecture}.zip") }
-    false: { $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip") }
+  # the following should be the default conventions going forward (0.7.5 and higher)
+  if $package_name == undef {
+      $package_name = downcase("packer_${version}_${kernel}_${architecture}.zip")
+  }
+  if $version_check == undef {
+      $version_check = '/opt/packer/bin/packer version'
   }
 
+  # url to retrieve the packer installation package
   $full_url = "${base_url}/${package_name}"
 
   if !defined(Class['staging']) {
@@ -37,7 +54,7 @@ class packer(
 
   exec { 'check_version_change':
     path    => "/bin",
-    command => "rm ${install_dir}/packer*",
+    command => "/usr/bin/test -f ${install_dir}/packer && rm ${install_dir}/packer*; return 0",
     unless  => "/bin/bash -c 'packer_version=\$($version_check | sed -nre \"s/^Packer v[^0-9]*(([0-9]+\\.)*[0-9]+).*/\\1/p\"); if [ \$packer_version = ${version} ]; then exit 0; else exit 1; fi'"
   } ->
   staging::file { $package_name: source => $full_url, } ->
