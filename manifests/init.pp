@@ -41,7 +41,7 @@ class packer(
 
   exec { 'check_version_change':
     path    => "/bin",
-    command => "rm -f ${install_dir}/packer*",
+    command => "rm -rf ${install_dir}/packer*",
     unless  => "/bin/bash -c 'packer_version=\$($version_check | sed -nre \"s/^Packer v[^0-9]*(([0-9]+\\.)*[0-9]+).*/\\1/p\"); if [ \$packer_version = ${version} ]; then exit 0; else exit 1; fi'",
     require => Package['unzip'],
   } ->
