@@ -31,8 +31,8 @@ class packer(
   if !defined(Class['staging']) {
     class { 'staging':
       path => '/var/staging',
-      owner => 'puppet',
-      group => 'puppet',
+      owner => 'root',
+      group => 'root',
     }
   }
 
