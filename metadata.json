@@ -9,7 +9,7 @@
     "project_page": "http://github.com/nrvale0/puppet-packer",
     "dependencies": [
         { "name": "puppetlabs/stdlib", "version_requirement": ">= 3.2.0" },
-        { "name": "nanliu/staging", "version_requirement": "0.4.0" },
+        { "name": "nanliu/staging", "version_requirement": ">= 0.4.0" },
         { "name": "AlexCline/dirtree", "version_requirement": ">= 0.2.1" }
     ]
 }
