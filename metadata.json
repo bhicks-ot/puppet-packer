@@ -1,0 +1,15 @@
+{
+    "name": "nrvale0-packer",
+    "version": "0.1.4",
+    "source": "git://github.com/nrvale0/puppet-packer",
+    "author": "Nathan Valentine - nrvale0@gmail.com|nathan@puppetlabs.com",
+    "license": "Apache License, Version 2.0",
+    "summary": "Install and Configure Packer",
+    "description": "Install and Configure Packer",
+    "project_page": "http://github.com/nrvale0/puppet-packer",
+    "dependencies": [
+        { "name": "puppetlabs/stdlib", "version_requirement": ">= 3.2.0" },
+        { "name": "nanliu/staging", "version_requirement": "0.4.0" },
+        { "name": "AlexCline/dirtree", "version_requirement": ">= 0.2.1" }
+    ]
+}
